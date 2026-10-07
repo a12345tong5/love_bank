@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>5201314 幸福愛意銀行 - 即時撥款系統</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- html2canvas for Screenshot Receipt Saving -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@600;800&family=Yuji+Boku&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .font-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Running Button Absolute Transition */
+    #rejectBtn {
+      transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    /* Dreamy Pastel Gradient */
+    .bg-romantic-gradient {
+      background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E9 30%, #FFD6E0 70%, #FFF5F7 100%);
+    }
+    /* Shimmer gradient buttons and cards */
+    .pink-glow-gradient {
+      background: linear-gradient(135deg, #FF5E8E 0%, #FF85A2 50%, #FFAAA6 100%);
+    }
+    .accent-card-gradient {
+      background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F8 100%);
+    }
+    /* Animated Floating Heart Bubbles in Background */
+    @keyframes floatingBubbles {
+      0% {
+        transform: translateY(105vh) scale(0.6) rotate(0deg);
+        opacity: 0.1;
+      }
+      50% {
+        opacity: 0.45;
+      }
+      100% {
+        transform: translateY(-15vh) scale(1.1) rotate(25deg);
+        opacity: 0;
+      }
+    }
+    .bubble-particle {
+      position: fixed;
+      pointer-events: none;
+      animation: floatingBubbles 14s infinite linear;
+      z-index: 0;
+    }
+    /* Seal Stamp Animation */
+    @keyframes stamp-pop {
+      0% {
+        opacity: 0;
+        transform: scale(3.5) rotate(-35deg);
+      }
+      70% {
+        opacity: 0.95;
+        transform: scale(0.92) rotate(-14deg);
+      }
+      100% {
+        opacity: 0.9;
+        transform: scale(1) rotate(-16deg);
+      }
+    }
+    .stamp-effect {
+      animation: stamp-pop 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    /* Heart particle on interactions */
+    .heart-float {
+      position: fixed;
+      pointer-events: none;
+      z-index: 70;
+      animation: floatUp 2.4s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.6) rotate(0deg);
+      }
+      50% {
+        opacity: 0.9;
+        transform: translateY(-80px) scale(1.15) rotate(15deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-160px) scale(1.4) rotate(-20deg);
+      }
+    }
+  </style>
+</head>
+<body class="bg-romantic-gradient text-slate-800 min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 relative overflow-x-hidden selection:bg-pink-400 selection:text-white">
+
+  <!-- Floating romantic ambient orbs & bubbles -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-24 -left-20 w-96 h-96 bg-pink-300/40 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/3 -right-24 w-96 h-96 bg-rose-200/50 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-24 left-1/4 w-96 h-96 bg-amber-200/40 rounded-full blur-3xl"></div>
+    
+    <!-- Ambient bubbles -->
+    <div class="bubble-particle text-pink-300 text-3xl" style="left: 10%; animation-delay: 0s; animation-duration: 12s;">💖</div>
+    <div class="bubble-particle text-rose-300 text-2xl" style="left: 28%; animation-delay: 3s; animation-duration: 15s;">🌸</div>
+    <div class="bubble-particle text-pink-400 text-4xl" style="left: 45%; animation-delay: 1.5s; animation-duration: 13s;">💕</div>
+    <div class="bubble-particle text-rose-300 text-xl" style="left: 68%; animation-delay: 5s; animation-duration: 11s;">✨</div>
+    <div class="bubble-particle text-pink-300 text-3xl" style="left: 85%; animation-delay: 2s; animation-duration: 14s;">💗</div>
+    <div class="bubble-particle text-pink-200 text-2xl" style="left: 92%; animation-delay: 6s; animation-duration: 16s;">🫧</div>
+  </div>
+
+  <!-- Main Bank Card Container -->
+  <main class="w-full max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-2 border-pink-200/90 rounded-[2rem] shadow-[0_20px_50px_rgba(255,143,171,0.25)] p-5 sm:p-7 relative flex flex-col justify-between z-10">
+    
+    <!-- Header / Security Badge -->
+    <header class="flex items-center justify-between border-b border-pink-100 pb-3.5 mb-4">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-2xl pink-glow-gradient flex items-center justify-center shadow-md shadow-pink-400/40 transform hover:rotate-6 transition">
+          <i data-lucide="heart-handshake" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-base font-extrabold text-slate-800 tracking-wide">幸福愛意銀行</h1>
+            <span class="text-[10px] bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full border border-pink-200 font-bold">💕 VIP 甜心專屬</span>
+          </div>
+          <p class="text-[11px] text-pink-400 font-num font-medium">LOVE-BANK · 5201314 即時撥款</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1 text-emerald-600 text-xs bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-[11px] font-bold">真愛連線中</span>
+      </div>
+    </header>
+
+    <!-- Countdown Timer Card -->
+    <div class="mb-4 bg-gradient-to-r from-pink-50 via-rose-50 to-pink-100 border border-pink-200/80 rounded-2xl p-3 flex items-center justify-between shadow-sm">
+      <div class="flex items-center space-x-2">
+        <span class="text-base">⏰</span>
+        <span class="text-xs font-semibold text-rose-600">受款倒數期限 (24:00 前)</span>
+      </div>
+      <div id="countdown" class="font-num font-extrabold text-sm sm:text-base text-rose-500 tracking-wider">
+        計算中...
+      </div>
+    </div>
+
+    <!-- Main Payment Transaction Details Box -->
+    <div class="accent-card-gradient border-2 border-pink-100 rounded-2xl p-4 sm:p-5 mb-5 relative overflow-hidden group shadow-inner">
+      <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-pink-200/30 rounded-full blur-xl pointer-events-none"></div>
+      
+      <p class="text-xs text-pink-500 font-bold mb-1 flex items-center justify-between">
+        <span>✨ 核定撥款額度</span>
+        <span class="text-[10px] bg-rose-50 text-rose-500 px-2 py-0.5 rounded-full border border-rose-200 font-medium">全額贊助 · 免還本金</span>
+      </p>
+      
+      <!-- Big Amount Display -->
+      <div class="flex items-baseline space-x-1.5 mb-4 mt-1">
+        <span class="text-rose-500 text-2xl font-black font-num">$</span>
+        <span class="text-4xl sm:text-5xl font-black text-rose-600 font-num tracking-tight drop-shadow-sm">10,000</span>
+        <span class="text-xs text-rose-400 font-bold ml-1">愛情台幣 (NTD)</span>
+      </div>
+
+      <!-- Account Pair Details -->
+      <div class="space-y-3 pt-3 border-t border-pink-100 text-xs">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 flex items-center gap-1.5 font-medium">
+            <i data-lucide="arrow-up-right" class="w-4 h-4 text-pink-500"></i> 轉出帳號
+          </span>
+          <span class="font-bold text-slate-700 text-right font-num">
+            9999-心動專戶 <span class="text-pink-500 font-bold text-[11px]">(你的專屬男友 👨‍💼)</span>
+          </span>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 flex items-center gap-1.5 font-medium">
+            <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-500"></i> 匯款碼 (受款帳號)
+          </span>
+          <div class="text-right">
+            <span class="font-num font-black text-rose-600 bg-pink-100/80 px-2.5 py-0.5 rounded-lg border border-pink-300 text-sm shadow-sm">5201314</span>
+            <div class="text-[11px] text-pink-500 font-bold mt-1">專屬小可愛 💕</div>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-start pt-1.5">
+          <span class="text-slate-500 flex items-center gap-1.5 font-medium shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i> 交易附言
+          </span>
+          <span class="text-rose-600 font-medium text-right max-w-[210px] leading-relaxed text-[11px] bg-white/70 p-1.5 rounded-lg border border-pink-100 shadow-sm">
+            「收到小可愛借款申請，一萬塊已全額批核，隨時奉上！💖」
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agreement notice -->
+    <div class="bg-pink-50/80 border border-pink-200 rounded-xl p-3 mb-5 flex items-start space-x-2 shadow-sm">
+      <i data-lucide="shield-check" class="w-4 h-4 text-pink-500 shrink-0 mt-0.5"></i>
+      <p class="text-[11px] text-pink-700 leading-normal font-medium">
+        點擊確認簽收視同無條件接受《5201314 幸福借貸終身條款》，本合約一旦核准概不可毀約退款。
+      </p>
+    </div>
+
+    <!-- Action Buttons Area -->
+    <div id="buttonArea" class="space-y-3 relative min-h-[110px] flex flex-col justify-end">
+      
+      <!-- Accept Button -->
+      <button id="acceptBtn" class="w-full py-3.5 px-4 rounded-2xl pink-glow-gradient text-white font-extrabold text-sm sm:text-base shadow-lg shadow-pink-500/40 hover:shadow-pink-500/60 active:scale-[0.98] transition transform flex items-center justify-center space-x-2 cursor-pointer z-10 border border-white/40">
+        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        <span>立即簽收並領取 $10,000 元 💰</span>
+      </button>
+
+      <!-- The Runaway Reject Button -->
+      <div class="relative w-full text-center">
+        <button id="rejectBtn" class="w-full py-2.5 px-4 rounded-xl bg-white/90 border border-pink-200 text-slate-500 hover:text-slate-700 text-xs font-semibold active:scale-95 shadow-sm cursor-pointer hover:bg-pink-50 transition">
+          <span id="rejectText">不同意附加條款 / 拒絕領取</span>
+        </button>
+      </div>
+
+    </div>
+
+    <p class="text-center text-[11px] text-pink-400/80 mt-4 font-num font-medium">
+      TX-ID: 520-1314-LOVE-9999 · 24H 浪漫客服心動在線 💌
+    </p>
+  </main>
+
+  <!-- Non-dismissible Love Contract Modal (No Close Button, No Backdrop Click) -->
+  <div id="modalOverlay" class="fixed inset-0 bg-pink-950/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300 overflow-y-auto">
+    <div id="modalContent" class="w-full max-w-md my-auto bg-white/95 border-2 border-pink-300 rounded-[2rem] shadow-2xl p-5 sm:p-6 text-slate-700 transform scale-95 transition-transform duration-300 relative">
+      
+      <!-- NOTE: Close Button REMOVED permanently by requirement -->
+
+      <!-- Contract Certification Card (For Screenshots) -->
+      <div id="receiptCard" class="bg-gradient-to-b from-rose-50/70 via-white to-pink-50/60 border-2 border-pink-200 rounded-2xl p-5 relative overflow-hidden mb-4 shadow-inner">
+        
+        <!-- Red Stamp Effect (Shows Approval) -->
+        <div id="officialStamp" class="absolute top-10 right-3 sm:right-6 border-[3.5px] border-rose-600 text-rose-600 rounded-2xl px-3 py-1 font-black text-center tracking-widest stamp-effect pointer-events-none z-20 flex flex-col items-center shadow-lg shadow-rose-200 bg-white/40 backdrop-blur-[1px]">
+          <span class="text-[10px] tracking-widest font-extrabold uppercase">LOVE BANK VIP</span>
+          <span class="text-base sm:text-lg">【 核貸成功 】</span>
+          <span class="text-[9px] -mt-0.5 font-bold">終身不得解約 🔒</span>
+        </div>
+
+        <!-- Receipt Header -->
+        <div class="text-center border-b border-dashed border-pink-200 pb-4 mb-4">
+          <div class="inline-flex p-2.5 rounded-full bg-pink-100 text-rose-500 mb-2 border border-pink-200 shadow-sm">
+            <i data-lucide="sparkle" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <h2 class="text-lg sm:text-xl font-black text-slate-800 tracking-wide">愛意款項入帳憑證</h2>
+          <p class="text-xs text-rose-400 font-num font-bold">交易序號：5201314-FOREVER-MYLOVE</p>
+        </div>
+
+        <!-- Receipt Key-Values -->
+        <div class="space-y-2.5 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 font-medium">核准撥款</span>
+            <span class="font-extrabold text-emerald-600 font-num text-sm bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              $ 10,000 NTD (無上限心動)
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 font-medium">收款戶名</span>
+            <span class="font-bold text-rose-500">5201314 (世界上最可愛的小女友)</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 font-medium">出資債主</span>
+            <span class="font-bold text-slate-700">專屬正牌男友 (全額贊助 ❤️)</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-400 font-medium">撥款時間</span>
+            <span id="transactTime" class="font-num font-bold text-slate-600"></span>
+          </div>
+        </div>
+
+        <!-- Contract Clauses (Strict & Sweet Terms) -->
+        <div class="mt-4 pt-3.5 border-t border-dashed border-pink-200 bg-pink-100/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-b border-pink-200">
+          <div class="text-xs font-black text-rose-600 mb-2 flex items-center gap-1.5">
+            <i data-lucide="scroll" class="w-3.5 h-3.5"></i>
+            《5201314 幸福借貸附加合約條款》
+          </div>
+          <ul class="text-[11px] text-slate-600 space-y-1.5 list-disc list-inside leading-relaxed font-medium">
+            <li><span class="text-rose-600 font-bold">條款一：</span>收款人需陪伴轉帳人一輩子，中途不得轉讓或悔約。</li>
+            <li><span class="text-rose-600 font-bold">條款二：</span>借款利息以「每日早晚抱抱各一次 + 晚安親親」按期償還，終身免還本金。</li>
+            <li><span class="text-rose-600 font-bold">條款三：</span>本合約一經簽署終身有效，不可關閉退出，已強制鎖定彼此的心。</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Action buttons in Modal -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button id="downloadReceiptBtn" class="py-2.5 px-3 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200 text-rose-600 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-sm">
+          <i data-lucide="camera" class="w-4 h-4 text-pink-500"></i>
+          <span>📸 截圖保存憑證</span>
+        </button>
+        <button id="reportToLoverBtn" class="py-2.5 px-3 rounded-xl pink-glow-gradient text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-pink-500/30 hover:opacity-95 transition active:scale-95 cursor-pointer">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>💌 回報債主已簽收</span>
+        </button>
+      </div>
+
+      <!-- Notification Toast inside modal -->
+      <div id="modalToast" class="mt-2.5 text-center text-xs font-bold text-rose-500 opacity-0 transition-opacity"></div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    /* ========================================================
+       1. COUNTDOWN TO 24:00 (MIDNIGHT)
+    ======================================================== */
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      let diff = target - now;
+
+      if (diff <= 0) {
+        document.getElementById('countdown').innerHTML = "⏰ 已過12點，轉帳已全面鎖定！";
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('countdown').innerHTML = 
+        `${String(hours).padStart(2, '0')}時 ${String(minutes).padStart(2, '0')}分 ${String(seconds).padStart(2, '0')}秒`;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    /* ========================================================
+       2. RUNAWAY REJECT BUTTON (調皮逃跑按鈕)
+    ======================================================== */
+    const rejectBtn = document.getElementById('rejectBtn');
+    const rejectText = document.getElementById('rejectText');
+
+    const runawayTeases = [
+      "抓不到我吧～😜",
+      "這筆錢妳休想拒絕！💖",
+      "手抖了嗎？再點一次看😏",
+      "系統判定：必須收下！🥰",
+      "哪有借錢不收的道理✨",
+      "乖乖點上面領一萬塊～",
+      "逃跑無效，只能收下！🌸"
+    ];
+    let teaseIndex = 0;
+
+    function runaway(e) {
+      if (e) e.preventDefault();
+
+      const maxDistanceX = 130;
+      const maxDistanceY = 60;
+      const randomX = (Math.random() - 0.5) * (maxDistanceX * 2);
+      const randomY = (Math.random() - 0.5) * (maxDistanceY * 2);
+
+      rejectBtn.style.transform = `translate(${randomX}px, ${randomY}px) scale(0.92)`;
+      
+      rejectText.innerText = runawayTeases[teaseIndex % runawayTeases.length];
+      teaseIndex++;
+
+      spawnFloatingHeart(
+        e ? (e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth/2) : window.innerWidth/2, 
+        e ? (e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight/2) : window.innerHeight/2, 
+        "😜"
+      );
+    }
+
+    rejectBtn.addEventListener('mouseenter', runaway);
+    rejectBtn.addEventListener('touchstart', runaway, { passive: false });
+    rejectBtn.addEventListener('click', (e) => {
+      runaway(e);
+    });
+
+    /* ========================================================
+       3. FLOATING HEART PARTICLES
+    ======================================================== */
+    function spawnFloatingHeart(x, y, char = "❤️") {
+      const el = document.createElement('div');
+      el.className = 'heart-float text-xl';
+      el.innerText = char;
+      el.style.left = `${x - 12}px`;
+      el.style.top = `${y - 12}px`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2400);
+    }
+
+    /* ========================================================
+       4. ACCEPT FLOW & DREAMY CELEBRATION
+    ======================================================== */
+    const acceptBtn = document.getElementById('acceptBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalContent = document.getElementById('modalContent');
+    const transactTimeEl = document.getElementById('transactTime');
+
+    acceptBtn.addEventListener('click', (e) => {
+      // Trigger full confetti
+      fireLoveConfetti();
+
+      // Spawn celebratory floating hearts
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          const rx = window.innerWidth * 0.15 + Math.random() * (window.innerWidth * 0.7);
+          const ry = window.innerHeight * 0.35 + Math.random() * (window.innerHeight * 0.3);
+          spawnFloatingHeart(rx, ry, ["💖", "💕", "✨", "🥰", "💰", "🌸"][Math.floor(Math.random() * 6)]);
+        }, i * 130);
+      }
+
+      // Fill current timestamp
+      const now = new Date();
+      transactTimeEl.innerText = now.toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+
+      // Show modal
+      modalOverlay.classList.remove('hidden');
+      setTimeout(() => {
+        modalOverlay.classList.remove('opacity-0');
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+      }, 20);
+    });
+
+    function fireLoveConfetti() {
+      const count = 220;
+      const defaults = { origin: { y: 0.7 } };
+
+      function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+          particleCount: Math.floor(count * particleRatio)
+        }));
+      }
+
+      fire(0.25, {
+        spread: 30,
+        startVelocity: 55,
+        colors: ['#ff4b72', '#ff85a1', '#ffd166', '#ffc2d1']
+      });
+      fire(0.2, {
+        spread: 60,
+        colors: ['#ffffff', '#ff1493', '#ff69b4', '#ffe5ec']
+      });
+      fire(0.35, {
+        spread: 100,
+        decay: 0.91,
+        scalar: 0.9,
+        colors: ['#f43f5e', '#fb7185', '#fda4af']
+      });
+      fire(0.1, {
+        spread: 120,
+        startVelocity: 28,
+        decay: 0.92,
+        scalar: 1.2,
+        colors: ['#e11d48', '#ffe4e6']
+      });
+    }
+
+    /* ========================================================
+       5. STRICT MODAL PERSISTENCE (點空白處不可關閉)
+    ======================================================== */
+    modalOverlay.addEventListener('click', (e) => {
+      // If user tries clicking the empty backdrop to exit
+      if (e.target === modalOverlay) {
+        // Shake modal gently to indicate it cannot be closed
+        modalContent.classList.add('animate-bounce');
+        setTimeout(() => modalContent.classList.remove('animate-bounce'), 600);
+        showToast("🔒 本合約終身綁定，不可關閉悔改喔～💖");
+      }
+    });
+
+    // Capture & Download Receipt image
+    const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
+    const receiptCard = document.getElementById('receiptCard');
+    const modalToast = document.getElementById('modalToast');
+
+    function showToast(msg) {
+      modalToast.innerText = msg;
+      modalToast.classList.remove('opacity-0');
+      setTimeout(() => {
+        modalToast.classList.add('opacity-0');
+      }, 3500);
+    }
+
+    downloadReceiptBtn.addEventListener('click', () => {
+      downloadReceiptBtn.disabled = true;
+      downloadReceiptBtn.innerHTML = `<span class="animate-spin mr-1">⏳</span> 產製憑證中...`;
+
+      html2canvas(receiptCard, {
+        backgroundColor: '#FFF0F5',
+        scale: 2,
+        useCORS: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `幸福愛意銀行_5201314_轉帳收據憑證.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        downloadReceiptBtn.disabled = false;
+        downloadReceiptBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-500"></i> 已存成憑證圖！`;
+        lucide.createIcons();
+        showToast("📸 憑證圖片已保存！快傳給男友查收吧！🥰");
+      }).catch(err => {
+        downloadReceiptBtn.disabled = false;
+        downloadReceiptBtn.innerHTML = `<i data-lucide="camera" class="w-4 h-4 text-pink-500"></i> 📸 截圖保存憑證`;
+        lucide.createIcons();
+        showToast("📱 請直接使用手機快捷鍵截圖傳給男友喔！");
+      });
+    });
+
+    // "Report to Lover" Button
+    const reportToLoverBtn = document.getElementById('reportToLoverBtn');
+    reportToLoverBtn.addEventListener('click', () => {
+      const copyText = "報告債主！我已於「5201314 幸福愛意銀行」成功領取了一萬元，並同意終身陪伴及每日抱抱親親還款條款！請查收～💖";
+      
+      const tempInput = document.createElement("textarea");
+      tempInput.value = copyText;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast("💌 已複製甜言蜜語！直接切回 LINE 貼給他就好囉！");
+      } catch (err) {
+        showToast("💌 已確認簽收！快回 LINE 找他討抱抱吧！");
+      }
+      document.body.removeChild(tempInput);
+    });
+  </script>
+</body>
+</html>
